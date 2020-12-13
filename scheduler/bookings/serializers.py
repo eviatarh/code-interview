@@ -18,3 +18,4 @@ class ProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Provider
         fields = ('name', )
+

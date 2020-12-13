@@ -9,30 +9,42 @@ from .serializers import ProviderSerializer
 # Create your views here.
 
 
-
 class ProviderView(views.APIView):
     def get(self, request):
+
         min_score = request.GET.get('minScore', None)
         date = request.GET.get('date', None)
         speciality = request.GET.get('speciality', None)
-        print(not speciality)
-        if not speciality or not date or not speciality:
+
+        if not speciality or not date or not min_score:
+            print(speciality, date, min_score)
             return HttpResponseBadRequest('<h1>Error in query</h1>')
 
         providers = Provider.objects.filter(score__gte=min_score)\
-            .filter(availableDates__to_time__gte=date)\
-            .filter( availableDates__from_time__lte=date)\
+            .filter(availabilities__to_time__gte=date)\
+            .filter(availabilities__from_time__lte=date)\
             .filter(specialities__type__iexact=speciality)
         values = list(set([p.name for p in providers]))
         print(values)
         return Response(values)
 
-    # def post(self, request):
-    #     serializer = BookSerializer(data=request.data)
-    #     print(serializer, serializer.is_valid())
-    #     if serializer.is_valid():
-    #         avails = Availabilities.objects.all() #filter(from_time__gte=serializer.data['date'], to_time_lte=serializer.data['date'])
-    #         print(avails)
-    #
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request):
+        req_dict = json.loads(request.body)
+        params = list(req_dict.keys())
+        if "name" not in params or "date" not in params:
+            return HttpResponseBadRequest('<h1>Error in query</h1>')
+
+        name = req_dict['name']
+        date = req_dict['date']
+        try:
+            res = Provider.objects.filter(name=name) \
+                .filter(availabilities__to_time__gte=date) \
+                .filter(availabilities__from_time__lte=date)
+            if res:
+                return HttpResponse('<h1>Provider available</h1>')
+        except Exception as e:
+            res = []
+
+        print(res)
+        return HttpResponseBadRequest('<h1>Error in query</h1>')

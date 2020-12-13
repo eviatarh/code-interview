@@ -21,5 +21,4 @@ from bookings import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('appointments/', views.ProviderView.as_view()),
-    path('appointments/*', views.ProviderView.as_view())
 ]
