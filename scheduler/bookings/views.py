@@ -23,8 +23,9 @@ class ProviderView(views.APIView):
         providers = Provider.objects.filter(score__gte=min_score)\
             .filter(availabilities__to_time__gte=date)\
             .filter(availabilities__from_time__lte=date)\
-            .filter(specialities__type__iexact=speciality)
-        values = list(set([p.name for p in providers]))
+            .filter(specialities__type__iexact=speciality).order_by('-score').distinct()
+        print(providers)
+        values = [p.name for p in providers]
         print(values)
         return Response(values)
 
